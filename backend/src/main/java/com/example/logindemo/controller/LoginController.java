@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins="http://localhost:4200/")
@@ -22,13 +22,15 @@ public class LoginController {
     @Autowired
     private UserRepository userRepository;
 
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        User user = userRepository.findByUsernameAndPassword(loginRequest.getUsername(), loginRequest.getPassword());
-        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
+        Optional<User> user = userRepository.findByUsername(loginRequest.getUsername());
+        if (!user.isPresent() || !bCryptPasswordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        return ResponseEntity.ok(new LoginResponse("Ihre Eingabe war korrekt"));
+        return ResponseEntity.ok(new LoginResponse("Login successful"));
     }
 
 
