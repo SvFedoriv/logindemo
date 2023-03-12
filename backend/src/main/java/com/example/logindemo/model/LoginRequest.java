@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 public class LoginRequest {
-//    @Nonnull
+    @Nonnull
     private String username;
-//    @Nonnull
+    @Nonnull
     private String password;
 }
